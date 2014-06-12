@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Quick-web快速开发框架</title>
+        <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+        #parse("layout/inc.vm") 
+		<style type="text/css">
+        	#menu a.l-btn span span.l-btn-text {
+        	    display: inline-block;
+        	    height: 14px;
+        	    line-height: 14px;
+        	    margin: 0px 0px 0px 10px;
+        	    padding: 0px 0px 0px 10px;
+        	    vertical-align: baseline;
+        	    width: 128px;
+        	}
+        	#menu a.l-btn span span.l-btn-icon-left {
+        	    background-position: left center;
+        	    padding: 0px 0px 0px 20px;
+        	}
+        	#menu .panel-body {
+        		padding:5px;
+        	}
+        	#menu span:focus{
+        		outline: none;
+        	}
+		</style>
+		<script type="text/javascript">
+		    jQuery(document).ready(function(){
+			    initMenu();
+			});
+    		
+			//加载菜单
+        	function initMenu(){
+			    var menu = jQuery("#menu");
+				jQuery(menu).accordion({animate:true,fit:true,border:false});
+				jQuery.post("${request.contextPath}/base/menu/initMenu",function(data){
+				    for(var i=0;i<data.length;i++){
+						var menuList = "<div class=\"well well-small\">";
+						//循环二级菜单
+						var secondData = data[i].child;
+						for(var j=0;j<secondData.length;j++){
+						    var currentMenu = secondData[j].menuName+"||"+secondData[j].iconCls+"||"+secondData[j].url;
+							menuList+="<a href=\"javascript:void(0);\" class=\"easyui-linkbutton\" data-options=\"plain:true,iconCls:'"+secondData[j].iconCls+"'\" onclick=\"addTab('"+currentMenu+"');\">"+secondData[j].menuName+"</a><br/>";
+						}
+						menuList +="</div>";
+						//添加菜单
+    					jQuery(menu).accordion('add',{
+        			        title: data[i].menuName,
+        			        content: menuList,
+        				    border:false,
+        			        iconCls: data[i].iconCls,
+        			        selected: false
+        			    });
+					}
+				},"json");	
+        	}
+	</script>
+    </head>
+    <body class="easyui-layout">
+    	<div data-options="region:'north',border:false" style="height:40px;background:#EEE;padding:10px;overflow: hidden;"  href="${request.contextPath}/base/layout/north"></div>
+    	<div data-options="region:'west',split:true,title:'导航菜单'" style="width:200px;">
+    		<div id="menu"></div>
+    	</div> 
+    	<div data-options="region:'south',border:false" style="height:25px;background:#EEE;padding:5px;" href="${request.contextPath}/base/layout/south"></div>
+    	<div data-options="region:'center',plain:true" style="overflow: hidden;"  href="${request.contextPath}/base/layout/center"></div>
+    </body>
+</html>

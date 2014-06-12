@@ -1,0 +1,103 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+        #parse("layout/inc.vm") 
+        <script type="text/javascript">
+    		//提交表单
+    		var submitForm = function(dialog,grid,parent){
+        		if($("#form").form("validate")){
+    			    parent.$.messager.progress({
+    					title : '提示',
+    					text : '数据处理中，请稍后....'
+    				});
+        			jQuery.post("${request.contextPath}/base/dept/save",ext.serializeObject($("#form")),function(result) {
+        				if(result.status){
+    					    parent.$.messager.progress('close');
+        					grid.treegrid('reload');
+        					dialog.dialog('destroy');
+        				}else{
+        					parent.messager.show({
+            					title:result.title,
+            					msg:result.message,
+            					timeout:1000*2
+            				});
+        				}
+        			},'json');
+        		}
+        	};
+            
+            //ComboTree组件
+            $(document).ready(function(){
+			    var selected = "#if($dept.pid)$dept.pid#end";
+            	$("#pid").combotree({
+            			width:153,
+            			url:"${request.contextPath}/base/dept/getAllDeptTree",
+            			idFiled:'id',
+            		 	textFiled:'name',
+            		 	parentField:'pid',
+            		 	onLoadSuccess:function(node,data){
+            		 		if(selected){
+								$("#pid").combotree("setValue",selected);
+							}
+            		 	}
+                });
+            });
+
+			//删除上级
+			function delParent(){
+				$("#pid").combotree("clear");
+			}
+        
+        </script>
+    </head>
+	<body>
+		<link rel="stylesheet" type="text/css" href="${request.contextPath}/resource/custom/css/form.css">
+        <div class="easyui-layout" data-options="fit:true,border:false">
+        	<div data-options="region:'center',border:false" title="" style="overflow: hidden;padding: 10px;">
+        		<form id="form" method="post">
+					#if($dept.id)
+						<input type="hidden" name="id" id="id" value="$dept.id" />
+					#end
+        			<fieldset>
+        				<legend><img src="${request.contextPath}/resource/custom/images/fromedit.png" style="margin-bottom: -3px;"/>添加组织机构</legend>
+        				<table>
+        					<tr>
+        						<th>机构名称</th>
+        						<td>
+									<input name="name" id="name" placeholder="请输入机构名称" class="easyui-textbox easyui-validatebox" type="text" value="#if($dept.name)$dept.name#end" />
+								</td>
+        						<th>上级名称</th>
+        						<td>
+        							<input name="pid" id="pid" placeholder="请选择上级机构名称" class="easyui-combotree" type="text"/>
+        							<img style="cursor:pointer;" onclick="delParent()" title="删除上级" src="${request.contextPath}/resource/custom/icon/041.png" />
+        						</td>
+        					</tr>
+        					<tr>
+        					    <th>负责人</th>
+        						<td><input id="leader" name="leader" placeholder="请输入负责人" type="text" class="easyui-textbox easyui-validatebox" value="#if($dept.leader)$dept.leader#end" /></td>
+        						<th>排序编号</th>
+								<td><input name="sort" id="sort" type="text" value="#if($menu.sort)$menu.sort#else 0 #end" style="width:153px;" class="easyui-numberspinner" data-options="min:0,max:100,editable:false"/></td>
+        						
+        					</tr>
+							<tr>
+        					    <th>电子邮箱</th>
+        						<td><input id="email" name="email" type="text" class="easyui-textbox easyui-validatebox" value="#if($dept.email)$dept.email#end" /></td>
+								<th>联系电话</th>
+								<td><input id="mobile" name="mobile" type="text" class="easyui-textbox easyui-validatebox" value="#if($dept.mobile)$dept.mobile#end" /></td>
+        						
+        					</tr>
+        					<tr>
+        						<th>传真</th>
+        						<td><input id="fax" name="fax" type="text" class="easyui-textbox easyui-validatebox" value="#if($dept.fax)$dept.fax#end" /></td>
+        					</tr>
+        				    <tr>
+        						<th>描述</th>
+        						<td colspan="3"><textarea class="easyui-textbox" name="description"  style="width: 439px;height: 100px;">#if($dept.description)$dept.description#end</textarea></td>
+        				    </tr>
+        				</table>
+        			</fieldset>
+        		</form>
+        	</div>
+        </div>
+	</body>
+</html>

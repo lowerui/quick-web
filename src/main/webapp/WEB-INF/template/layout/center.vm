@@ -1,0 +1,104 @@
+<script type="text/javascript" charset="utf-8">
+    var centerTabs;
+	jQuery(document).ready(function(){
+		//Tabs工具栏Start
+		centerTabs = jQuery('#centerTabs').tabs({
+				tools:[
+						{
+						    text:'刷新',
+							iconCls:'icon-009',
+    						handler:function(){
+    							var href = jQuery('#centerTabs').tabs('getSelected').panel('options').href;
+    							if(href){/*说明tab是以href方式引入的目标页面*/
+    								var index = jQuery('#centerTabs').tabs('getTabIndex', jQuery('#centerTabs').tabs('getSelected'));
+    								jQuery('#centerTabs').tabs('getTab', index).panel('refresh');
+    							}else{/*说明tab是以content方式引入的目标页面*/
+    								var panel = jQuery('#centerTabs').tabs('getSelected').panel('panel');
+    								var frame = panel.find('iframe');
+    								try{
+    									if(frame.length > 0){
+    										for(var i = 0; i < frame.length; i++){
+    											frame[i].contentWindow.document.write('');
+    											frame[i].contentWindow.close();
+    											frame[i].src = frame[i].src;
+    										}
+    										if(jQuery.browser.msie){
+    											CollectGarbage();
+    										}
+    									}
+    								}catch(e){
+    									
+    								}
+    						  	}
+    						}
+						},
+						
+						{
+							iconCls:'icon-041',
+							text:'关闭',
+							handler:function(){
+								var index = jQuery('#centerTabs').tabs('getTabIndex', jQuery('#centerTabs').tabs('getSelected'));
+								var tab = jQuery('#centerTabs').tabs('getTab', index);
+								if(tab.panel('options').closable){
+									jQuery('#centerTabs').tabs('close', index);
+								}else{
+									jQuery.messager.show({title:'消息提示',msg:'['+tab.panel('options').title+'] 不可以关闭',timeout:3000});
+								}
+                     	    }
+                		}
+			],
+			
+			fit:true,
+			border:false,
+			onContextMenu:function(e, title) {
+				e.preventDefault();
+				tabsMenu.menu('show',{
+					left : e.pageX,
+					top : e.pageY
+				}).data('tabTitle', title);
+			}
+		});
+		//Tabs工具栏END
+	});
+	
+
+	
+	//新打开Tab
+	function addTab(node) {
+		var nodes=node.split("||");
+		if(centerTabs.tabs('exists', nodes[0])){
+			centerTabs.tabs('select',nodes[0]);
+		}else{
+			centerTabs.tabs('add',{
+					title:nodes[0],
+					closable:true,
+					iconCls:nodes[1],
+					content:"<iframe src="+nodes[2]+" frameborder=\"0\" style=\"border:0;width:100%;height:99.5%;\"></iframe>",
+					tools:[{
+						iconCls:'icon-mini-refresh',
+						handler:function() {
+							refreshTab(nodes[0]);
+						}
+					}]
+			});
+		}
+	}
+	
+	//刷新Tab
+	function refreshTab(title) {
+		var tab = centerTabs.tabs('getTab', title);
+		centerTabs.tabs('update',{
+			tab:tab,
+			options:tab.panel('options')
+		});
+	}
+	
+	//首页内容
+	
+</script>
+<div id="centerTabs">
+	<div iconCls="icon-044" title="我的桌面" border="false" style="overflow: hidden;">
+		<iframe src="" frameborder="0" style="border:0;width:100%;height:99.5%;"></iframe>
+	</div>
+</div>
+

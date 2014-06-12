@@ -1,0 +1,57 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+        #parse("layout/inc.vm") 
+        <script type="text/javascript">
+    		//提交表单
+    		var submitForm = function(dialog,grid,parent){
+        		if($("#form").form("validate")){
+    			    parent.$.messager.progress({
+    					title : '提示',
+    					text : '数据处理中，请稍后....'
+    				});
+        			jQuery.post("${request.contextPath}/base/role/save",ext.serializeObject($("#form")),function(result) {
+        				if(result.status){
+    					    parent.$.messager.progress('close');
+        					grid.datagrid('reload');
+        					dialog.dialog('destroy');
+        				}else{
+        					parent.messager.show({
+            					title:result.title,
+            					msg:result.message,
+            					timeout:1000*2
+            				});
+        				}
+        			},'json');
+        		}
+        	};
+        </script>
+    </head>
+	<body>
+		<link rel="stylesheet" type="text/css" href="${request.contextPath}/resource/custom/css/form.css">
+        <div class="easyui-layout" data-options="fit:true,border:false">
+        	<div data-options="region:'center',border:false" title="" style="overflow: hidden;padding: 10px;">
+        		<form id="form" method="post">
+					#if($role.id)
+						<input type="hidden" name="id" id="id" value="$role.id" />
+					#end
+        			<fieldset>
+        				<legend><img src="${request.contextPath}/resource/custom/images/fromedit.png" style="margin-bottom: -3px;"/>#if($role.id)编辑#else添加#end角色</legend>
+        				<table>
+        					<tr>
+        						<th>角色名称</th>
+        						<td>
+									<input name="name" id="name" placeholder="请输入角色名称" class="easyui-textbox easyui-validatebox" required="true" type="text" value="#if($role.name)$role.name#end" />
+								</td>
+        					</tr>
+        				    <tr>
+        						<th>描述</th>
+        						<td colspan="3"><textarea class="easyui-textbox" name="description"  style="width: 439px;height: 100px;">#if($role.description)$role.description#end</textarea></td>
+        				    </tr>
+        				</table>
+        			</fieldset>
+        		</form>
+        	</div>
+        </div>
+	</body>
+</html>

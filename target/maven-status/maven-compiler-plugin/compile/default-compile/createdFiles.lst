@@ -1,0 +1,14 @@
+com\quick\web\dto\Message.class
+com\quick\web\entity\Role.class
+com\quick\web\entity\User.class
+com\quick\web\base\controller\LayoutController.class
+com\quick\web\entity\Menu.class
+com\quick\web\entity\BaseEntity.class
+com\quick\web\respository\mybatis\MybatisRepository.class
+com\quick\core\util\PropertiesLoader.class
+com\quick\web\util\Constants.class
+com\quick\web\base\service\MenuService.class
+com\quick\web\respository\mybatis\MenuDao.class
+com\quick\web\dto\Icon.class
+com\quick\web\base\controller\MenuController.class
+com\quick\web\base\controller\StyleController.class

@@ -1,0 +1,163 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+        #parse("layout/inc.vm") 
+		<script>
+		    var grid;
+			$(document).ready(function(){
+		    grid = $("#treeGrid").treegrid({
+					width : 'auto',
+					height : $(this).height()-90,
+					url : "${request.contextPath}/base/menu/getAllMenu",
+					rownumbers:true,
+					animate: true,
+					collapsible: true,
+					fitColumns: true,
+					striped:true,
+					border:false,
+					singleSelect:true,
+					idField: 'id',
+					treeField: 'menuName',
+					frozenColumns:[[
+					     {
+						 	title:'资源名称',
+							field:'menuName',
+							width:parseInt($(this).width()*0.2),
+					        formatter:function(value){
+					              return '<span style="color:red">'+value+'</span>';
+					        }
+					     }
+					]],
+					columns:[[ 
+					     {field:'icon',title:'资源图标',align:'center',width:parseInt($(this).width()*0.1),
+					         formatter:function(value,row){
+					         	return "<span class='"+row.iconCls+"' style='display:inline-block;vertical-align:middle;width:16px;height:16px;'></span>";
+							 }
+					     },
+					     {field:'url',title:'资源路径',width:parseInt($(this).width()*0.2),align:'left'},
+					     {field:'type',title:'资源类型',width : parseInt($(this).width()*0.1),align:'left',
+					         formatter:function(value,row){
+					            if(row.type==0)
+									return "<font color=green>菜单<font>";
+						        else
+						            return "<font color=red>动作<font>";  
+							 }
+						  },
+						  {field:'sort',title:'排序号码',width:parseInt($(this).width()*0.1)},
+					      {field:'description',title:'资源描述',width:parseInt($(this).width()*0.2),align:'left'}
+					 ]],
+					 toolbar:'#tb'
+					 
+				});
+			});
+			
+			//添加操作
+			var add = function() {
+        		var dialog = parent.ext.modalDialog({
+        			title:'添加资源信息',
+					width:600,
+					height:400,
+        			url:'${request.contextPath}/base/menu/edit',
+        			buttons:[{
+        				text:'保存',
+						iconCls:'icon-011',
+        				handler:function() {
+        					dialog.find('iframe').get(0).contentWindow.submitForm(dialog, grid, parent);
+        				}
+        			},
+					{
+						text:'取消',
+						iconCls:'icon-041',
+        				handler:function() {
+        					dialog.dialog('destroy');
+        				}
+					}]
+        		});
+            };
+			
+			//编辑操作
+			var edit = function() {
+			    var row = grid.treegrid('getSelected');
+				if(row){
+					var dialog = parent.ext.modalDialog({
+            			title:'编辑资源信息',
+    					width:600,
+    					height:400,
+            			url:'${request.contextPath}/base/menu/edit?id='+row.id,
+            			buttons:[{
+            				text:'保存',
+    						iconCls:'icon-011',
+            				handler:function() {
+            					dialog.find('iframe').get(0).contentWindow.submitForm(dialog, grid, parent);
+            				}
+            			},
+    					{
+    						text:'取消',
+    						iconCls:'icon-041',
+            				handler:function() {
+            					dialog.dialog('destroy');
+            				}
+    					}]
+            		});
+				}else{
+					parent.$.messager.show({
+						title :"提示",
+						msg :"请选择一行记录!",
+						timeout:1000*2
+					});
+				}
+        		
+            };
+			
+			//删除操作
+			function del(){
+				var row = grid.treegrid('getSelected');
+				if(row){
+					parent.$.messager.confirm("提示","确定要删除记录吗?",function(value){  
+					    if(value){
+							$.post("${request.contextPath}/base/menu/delete",{id:row.id},function(result){
+								if(result.status){
+									grid.treegrid('remove',row.id);
+								}
+								parent.$.messager.show({
+									title:result.title,
+									msg:result.message,
+									timeout:1000*2
+								});
+							},"JSON").error(function() {
+								parent.$.messager.show({
+									title:"提示",
+									msg:"操作出错了!",
+									timeout:1000*2
+								});
+							});
+						}
+					});
+				}else{
+					parent.$.messager.show({
+						title :"提示",
+						msg :"请选择一行记录!",
+						timeout:1000*2
+					});
+				}
+			}
+        </script>
+    </head>
+    <body style="padding-top:5px;">
+		  	<div class="well well-small" style="margin-left:5px;">
+				<span class="badge">提示</span>
+				<p>
+					在此你可以对<span class="label-info"><strong>菜单功能</strong></span>进行编辑!  &nbsp;<span class="label-info"><strong>注意</strong></span>操作功能是对菜单功能的操作权限！
+					请谨慎填写程序编码，权限区分标志，请勿重复!
+				</p>
+			</div>
+			<div id="tb" style="padding-top:5px;height:30px;">
+    			<div style="height:30px;">
+    				<a href="javascript:void(0);" class="easyui-linkbutton"  iconCls="icon-015" plain="true" onclick="add();">添加</a>
+    				<a href="javascript:void(0);" class="easyui-linkbutton"  iconCls="icon-067" plain="true" onclick="edit();">编辑</a>
+    				<a href="javascript:void(0);" class="easyui-linkbutton"  iconCls="icon-041" plain="true" onclick="del();">删除</a>
+    			</div>
+			</div>
+			<table id="treeGrid" title="资源管理"></table>
+    </body>
+</html>

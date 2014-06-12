@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<!-- namespace 必须指向dao接口 -->
+<mapper namespace="com.quick.web.respository.mybatis.UserDao">
+    <!-- 开启二级缓存 -->
+    <cache readOnly="false"></cache>
+    
+    <!--插入一个用户-->
+    <insert id="insert" parameterType="User">
+    	<selectKey resultType="Integer" order="AFTER" keyProperty="id">
+			SELECT LAST_INSERT_ID() AS id
+	    </selectKey>
+    	insert into base_user(loginAccount,password,userName,email,mobile,createDate,creatorId,modifyDate,modifyId)
+    	values(#{loginAccount},#{password},#{userName},#{email},#{mobile},now(),#{creatorId},now(),#{modifyId})
+    	
+    </insert>
+    
+    <!-- 编辑一个用户-->
+    <update id="update" parameterType="User">
+    	update base_user password = #{password},userName = #{userName},email = #{email},mobile = #{mobile},
+    	modifyDate = now(),modifyId = #{modifyId}
+    	where id = #{id}
+    		   
+    </update>
+    
+    <!-- 根据id删除一个用户 -->
+    <delete id="delete" parameterType="Integer">
+    	delete from base_user where where id=#{id}
+    </delete>
+    
+     <!-- 批量删除用户-->
+    <delete id="deleteAll">
+    	delete from base_user where id in
+    	<foreach item="id" index="index" collection="list" open="(" separator="," close=")">  
+		  #{id}  
+		</foreach>  
+    </delete>
+    
+    <!-- 根据id查询一个用户-->
+    <select id="getUserById" parameterType="Integer" resultType="User">
+    	select * from base_user where id=#{id}
+    </select>
+    
+    <!-- 查询所有用户 -->
+    <select id="getAllUser" resultType="User">
+    	select * from base_user 
+    </select>
+    
+    <!-- 分页查询用户-->
+    <select id="getPage" parameterType="Query" resultType="User">
+    	select * from base_user where 1 = 1
+    	<include refid="dynamicSql"/>
+    	limit #{start},#{rows}
+    </select>
+    
+    <!-- 查询总记录数 -->
+    <select id="getTotals" parameterType="Query" resultType="Integer">
+    	select count(*) from base_user where 1 = 1 
+    	<include refid="dynamicSql"/>
+    </select>
+    
+    <!-- 动态查询条件 -->
+    <sql id="dynamicSql">
+    	<if test="key !=null and value !=null">
+    		and ${key} like CONCAT('%',#{value},'%')
+    	</if>
+    </sql>
+    
+   
+    
+    
+    
+    
+
+</mapper>

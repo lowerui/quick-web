@@ -1,0 +1,187 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+        #parse("layout/inc.vm") 
+		<script>
+		    var grid;
+			$(document).ready(function(){
+		    grid = $("#dataGrid").datagrid({
+					width : 'auto',
+					height :  $(this).height()-84,
+					url:"${request.contextPath}/base/user/getAllUser",
+					pagination:true,
+					border:false,
+					singleSelect:false,
+					striped:true,
+					collapsible: true,
+					columns:[[ 
+					      {field:'id',title:'ID',width:parseInt($(this).width()*0.1),align:'left',checkbox:'true'},
+					      {field:'loginAccount',title:'登录账号',width:parseInt($(this).width()*0.25),align:'left'},
+						   {field:'loginAccount',title:'登录账号',width:parseInt($(this).width()*0.25),align:'left'},
+					      {field:'description',title:'角色描述',width:parseInt($(this).width()*0.3),align:'left'},
+						  {field:'createDate',title:'创建时间',sortable:true,width:parseInt($(this).width()*0.2),align:'center'},
+						  {field:'操作',title:'操作',width:parseInt($(this).width()*0.21),align:'center',formatter:function(value,row,index){
+						        var html  ="<div style='vertical-align:middle;'>"; 
+								    html  ="<img src='${request.contextPath}/resource/custom/icon/064.png' title='设置权限' style='cursor:pointer;vertical-align:bottom;' onclick='setAuth("+row.id+")' />权限";
+									html +="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+									html +="<img src='${request.contextPath}/resource/custom/icon/065.png' title='设置用户' style='cursor:pointer;vertical-align:bottom;' onclick='setUser("+row.id+")'/>用户";
+									html +="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+									html +="<img src='${request.contextPath}/resource/custom/icon/047.png' title='设置机构' style='cursor:pointer;vertical-align:bottom;' onclick='setUser("+row.id+")'/>机构";
+									html +="</div>";
+								return html;
+						  }}
+						  
+					 ]],
+					 toolbar:'#tb'
+					 
+				});
+				
+				//模糊搜索框
+				$("#searchbox").searchbox({ 
+					 menu:"#single", 
+					 prompt :'模糊查询',
+				     searcher:function(value,name){   
+				    	var str="{\"key\":\""+name+"\",\"value\":\""+value+"\"}";
+			            var obj = eval('('+str+')');
+			            grid.datagrid('reload',obj); 
+				     }
+				});
+				
+			});
+			
+			//添加操作
+			var add = function() {
+        		var dialog = parent.ext.modalDialog({
+        			title:'添加角色',
+					width:600,
+					height:400,
+        			url:'${request.contextPath}/base/role/edit',
+        			buttons:[{
+        				text:'保存',
+						iconCls:'icon-011',
+        				handler:function() {
+        					dialog.find('iframe').get(0).contentWindow.submitForm(dialog, grid, parent);
+        				}
+        			},
+					{
+						text:'取消',
+						iconCls:'icon-041',
+        				handler:function() {
+        					dialog.dialog('destroy');
+        				}
+					}]
+        		});
+            };
+			
+			//编辑操作
+			var edit = function() {
+			    var row = grid.datagrid('getSelected');
+				if(row){
+					var dialog = parent.ext.modalDialog({
+            			title:'编辑角色',
+    					width:600,
+    					height:400,
+            			url:'${request.contextPath}/base/role/edit?id='+row.id,
+            			buttons:[{
+            				text:'保存',
+    						iconCls:'icon-011',
+            				handler:function() {
+            					dialog.find('iframe').get(0).contentWindow.submitForm(dialog, grid, parent);
+            				}
+            			},
+    					{
+    						text:'取消',
+    						iconCls:'icon-041',
+            				handler:function() {
+            					dialog.dialog('destroy');
+            				}
+    					}]
+            		});
+				}else{
+					parent.$.messager.show({
+						title :"提示",
+						msg :"请选择一行记录!",
+						timeout:1000*2
+					});
+				}
+        		
+            };
+			
+			//删除操作
+			function del(){
+				var rows = grid.datagrid('getSelections');
+				if(rows && rows.length >0){
+				    var ids = "";
+				    for(var i=0;i<rows.length;i++){
+						ids+=rows[i].id+",";
+					}
+					parent.$.messager.confirm("提示","确定要删除记录吗?",function(value){  
+					    if(value){
+							$.post("${request.contextPath}/base/role/delete",{ids:ids},function(result){
+								if(result.status){
+								    grid.datagrid('reload');
+								}
+								parent.$.messager.show({
+									title:result.title,
+									msg:result.message,
+									timeout:1000*2
+								});
+							},"JSON").error(function() {
+								parent.$.messager.show({
+									title:"提示",
+									msg:"操作出错了!",
+									timeout:1000*2
+								});
+							});
+						}
+					});
+				}else{
+					parent.$.messager.show({
+						title :"提示",
+						msg :"请选择一行记录!",
+						timeout:1000*2
+					});
+				}
+			}
+			
+			//高级查询
+			function  gradeSearch() {
+				ext.gradeSearch(grid,"#userSearchFm","jsp/user/userSearchDlg.jsp");
+			}
+			
+			//设置权限
+			function setAuth(id){
+				alert(id);
+			}
+        </script>
+    </head>
+    <body style="padding-top:5px;">
+		  	<div class="well well-small" style="margin-left:5px;">
+				<span class="badge">提示</span>
+				<p>
+					在此你可以对<span class="label-info"><strong>角色</strong></span>进行添加、编辑、或者删除!
+				</p>
+			</div>
+			<div id="tb" style="padding:2px 0">
+    			<table cellpadding="0" cellspacing="0">
+    				<tr>
+    					<td>
+    						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-015" plain="true" onclick="add();">添加</a>
+    						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-067" plain="true" onclick="edit();">编辑</a>
+    						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-041" plain="true" onclick="del();">删除</a>
+    					</td>
+    					<td>
+    						<input id="searchbox" type="text"/>
+    					</td>
+    					<td>
+    						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="gradeSearch();">高级查询</a>
+    					</td>
+    				</tr>
+    		    </table>
+		   </div>
+		   <div id="single">
+    				<div name="name">角色名称</div>
+    		</div>
+		   <table id="dataGrid" title="角色管理"></table>
+    </body>
+</html>

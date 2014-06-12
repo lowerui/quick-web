@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+		#parse("layout/inc.vm") 
+		<script>
+			var selectIcon = function (dialog,iconCls){
+				var iconClassName = $("input[name='iconCls']:checked").val();
+				dialog.dialog('destroy');
+				iconCls.val(iconClassName);
+			};
+        </script>
+    </head>
+	<body style="padding:5px;">
+		<table class="table" style="width: 100%;">
+			#set($index=0)
+			#foreach($icon in $list) 
+				#set($index=$index+1)
+				#if($index%8==1)
+					<tr>
+				#end
+        				<td style="border: 1px solid #CCE6FF;padding: 0.3em 0.7em;text-align: left;">
+        					<input name="iconCls" value="$icon.className" type="radio" />
+        					<img src="${request.contextPath}/resource/custom/icon/$icon.iconName" />
+        				</td>
+				#if($index%8==0)
+					</tr>
+				#end
+			#end	
+		</table>
+    </body>
+</html>

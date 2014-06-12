@@ -1,0 +1,135 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+        #parse("layout/inc.vm") 
+        <script type="text/javascript">
+    		//提交表单
+    		var submitForm = function(dialog,grid,parent){
+        		if($("#form").form("validate")){
+    			    parent.$.messager.progress({
+    					title : '提示',
+    					text : '数据处理中，请稍后....'
+    				});
+        			jQuery.post("${request.contextPath}/base/menu/save",ext.serializeObject($("#form")),function(result) {
+        				if(result.status){
+    					    parent.$.messager.progress('close');
+        					grid.treegrid('reload');
+        					dialog.dialog('destroy');
+        				}else{
+        					parent.messager.show({
+            					title:result.title,
+            					msg:result.message,
+            					timeout:1000*2
+            				});
+        				}
+        			},'json');
+        		}
+        	};
+            
+            //ComboTree组件
+            $(document).ready(function(){
+			    var selected = "#if($menu.pid)$menu.pid#end";
+            	$("#pid").combotree({
+            			width:153,
+            			url:"${request.contextPath}/base/menu/getAllMenuTree",
+            			idFiled:'id',
+            		 	textFiled:'menuName',
+            		 	parentField:'pid',
+            		 	onLoadSuccess:function(node,data){
+            		 		if(selected){
+								$("#pid").combotree("setValue",selected);
+							}
+            		 	}
+                });
+            });
+    		
+    		//浏览icon小图标
+    		var viewIcon = function (){
+    			var dialog = parent.ext.modalDialog({
+            			title:'选择图标',
+    					width:600,
+    					height:400,
+            			url:'${request.contextPath}/base/style/viewIcon',
+            			buttons:[{
+            				text:'保存',
+    						iconCls:'icon-011',
+            				handler:function() {
+            					dialog.find('iframe').get(0).contentWindow.selectIcon(dialog,$("#iconCls"));
+            				}
+            			},
+    					{
+    						text:'取消',
+    						iconCls:'icon-041',
+            				handler:function() {
+            					dialog.dialog('destroy');
+            				}
+    					}]
+            	});
+    		}
+			
+			//删除小图标
+			function delIcon(){
+				$("#iconCls").val("");
+			}
+			
+			//删除上级
+			function delParent(){
+				$("#pid").combotree("clear");
+			}
+        
+        </script>
+    </head>
+	<body>
+		<link rel="stylesheet" type="text/css" href="${request.contextPath}/resource/custom/css/form.css">
+        <div class="easyui-layout" data-options="fit:true,border:false">
+        	<div data-options="region:'center',border:false" title="" style="overflow: hidden;padding: 10px;">
+        		<form id="form" method="post">
+					#if($menu.id)
+						<input type="hidden" name="id" id="id" value="$menu.id" />
+					#end
+        			<fieldset>
+        				<legend><img src="${request.contextPath}/resource/custom/images/fromedit.png" style="margin-bottom: -3px;"/>添加资源</legend>
+        				<table>
+        					<tr>
+        						<th>资源名称</th>
+        						<td>
+									<input name="menuName" id="menuName" placeholder="请输入资源名称" class="easyui-textbox easyui-validatebox" type="text" value="#if($menu.menuName)$menu.menuName#end" />
+								</td>
+        						<th>上级名称</th>
+        						<td>
+        							<input name="pid" id="pid" placeholder="请选择上级资源名称" class="easyui-combotree" type="text"/>
+        							<img style="cursor:pointer;" onclick="delParent()" title="删除上级" src="${request.contextPath}/resource/custom/icon/041.png" />
+        						</td>
+        					</tr>
+        					<tr>
+        					    <th>资源路径</th>
+        						<td><input id="url" name="url" placeholder="请输入访问路径" type="text" class="easyui-textbox easyui-validatebox" value="#if($menu.url)$menu.url#end" /></td>
+        						<th>资源类型</th>
+        						<td>
+        							<select id="type" class="easyui-combobox" name="type" style="width:153px;" data-options="required:true">
+        								<option value="0" #if($menu.type==0)selected#end >菜单</option>
+        								<option value="1" #if($menu.type==1)selected#end >操作</option>
+        							</select>
+        						</td>
+        					</tr>
+        					<tr>
+        						<th>资源图标</th>
+        						<td>
+        							<input id="iconCls" name="iconCls" type="text" class="easyui-textbox" value="#if($menu.iconCls)$menu.iconCls#end"  />
+        							<img style="cursor:pointer;" onclick="viewIcon()" title="浏览图标" src="${request.contextPath}/resource/custom/icon/052.png" />
+        							<img style="cursor:pointer;" onclick="delIcon()" title="删除图标" src="${request.contextPath}/resource/custom/icon/041.png" />
+        						</td>
+        						<th>排序编号</th>
+        						<td><input name="sort" id="sort" type="text" value="#if($menu.sort)$menu.sort#else 0 #end" style="width:153px;" class="easyui-numberspinner" data-options="min:0,max:100,editable:false"/></td>
+        					</tr>
+        				    <tr>
+        						<th>描述</th>
+        						<td colspan="3"><textarea class="easyui-textbox" name="description"  style="width: 439px;height: 100px;">#if($menu.description)$menu.description#end</textarea></td>
+        				    </tr>
+        				</table>
+        			</fieldset>
+        		</form>
+        	</div>
+        </div>
+	</body>
+</html>

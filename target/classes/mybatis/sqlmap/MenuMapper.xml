@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<!-- namespace 必须指向dao接口 -->
+<mapper namespace="com.quick.web.respository.mybatis.MenuDao">
+    
+
+    <!-- 开启二级缓存 -->
+    <cache readOnly="false"></cache>
+    
+    <!-- 查询所有菜单 参数pid 如果为null查询顶级菜单否则查询pid下级菜单 -->
+    <select id="getAllMenuByPid" resultType="Menu" parameterType="Integer">
+    	select * from base_menu where 1 = 1 
+    	<if test="_parameter ==null">
+    		and pid is null
+    	</if>
+    	<if test="_parameter !=null">
+    		and pid = #{pid}
+    	</if>
+    	order by sort asc
+    </select>
+    
+    <!-- 查询所有菜单 -->
+    <select id="getAllMenu" resultType="Menu">
+    	select * from base_menu
+    	order by sort asc
+    </select>
+    
+    <!-- 判断一个菜单是否有下级 -->
+    <select id="isHasChildById" resultType="Integer" parameterType="Integer">
+    	select count(*) from base_menu where pid = #{id}
+    </select>
+    
+    <!-- 根据id查询资源 -->
+    <select id="getMenuById" parameterType="Integer" resultType="Menu">
+    	select * from base_menu where id = #{id}
+    </select>
+    
+    <!-- 插入 -->
+    <insert id="insert" parameterType="Menu">
+    	insert into base_menu (menuName,url,type,sort,pid,path,iconCls,description)
+    	values(#{menuName},#{url},#{type},#{sort},#{pid},#{path},#{iconCls},#{description});
+    </insert>
+
+    <!-- 更新操作 -->
+    <update id="update">
+    	update base_menu set menuName = #{menuName},url = #{url},type = #{type},sort = #{sort},
+    	pid = #{pid},path = #{path},iconCls = #{iconCls},description = #{description}
+    	where id = #{id}
+    </update>
+    
+    <!-- 根据id 删除资源包含下级资源 -->
+    <delete id="delete" parameterType="Integer">
+    	delete from base_menu where id = #{id}
+    </delete>
+    
+    
+    
+    
+
+</mapper>
